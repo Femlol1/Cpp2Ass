@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "xstring": "cpp",
+        "iostream": "cpp",
+        "fstream": "cpp",
+        "unordered_map": "cpp",
+        "iosfwd": "cpp"
+    }
+}
