@@ -11,43 +11,46 @@ using  namespace std;
 
 #include "program.cpp"
 
-vector<string> inventory;
+class Player{
+public:
+	vector<string> inventory;
 
-void grab(const string& item) {
-    cout << "You grabbed: " << item << endl;
+	void grab(const string& item) {
+		inventory.push_back(item);
+    	cout << "You grabbed: " << item << endl;
+	}
 
+	void look(const string& item){
+    	cout << "You look at: " << item << endl;
+	}
 
-}
+	void move(const string& direction){
+    	cout << "You moved in " << direction << "direction" << endl;
 
-void look(const string& item){
-    cout << "You look at: " << item << endl;
-}
+	}
 
-void move(const string& direction){
-    cout << "You moved in " << direction << "direction" << endl;
-}
+	void kill(const string& enemy){
+    	cout << "You fought " << enemy << ", you died lol" << endl;
+	}
 
-void kill(const string& enemy){
-    cout << "You fought " << enemy << ", you died lol" << endl;
-}
-
-void unknownCommand(const string& command) {
-    cout << "Unknown command: " << command << endl;
-}
-
-typedef void (*CommandFunction)(const string&);
+	void unknownCommand(const string& command) {
+    	cout << "Unknown command: " << command << endl;
+	}
+};
+typedef void (Player::*CommandFunction)(const string&);
 
 int main()
 {
+	Player player;
     ifstream fin("map1.json");
 	json j; // object that represents the json data
 	fin >> j; // read from file into j
 
     unordered_map<string, CommandFunction> commands;
-    commands["grab"] = grab;
-    commands["move"] = move;
-    commands["kill"] = kill;
-    commands["look"] = look;
+    commands["grab"] = &Player::grab;
+    commands["move"] = &Player::move;
+    commands["kill"] = &Player::kill;
+    commands["look"] = &Player::look;
     
     int numTypes = j.size();
 	//cout << numTypes << endl;
@@ -65,14 +68,11 @@ int main()
 
 	// This retrieves the aggressiveness of the first enemy,;o
 	// and the list of objects that kills it as a vector
-	/*int agg = j["enemies"][0]["aggressiveness"].get<int>();
+	int agg = j["enemies"][0]["aggressiveness"].get<int>();
 	cout << agg << endl;
 	vector<string> v = j["enemies"][0]["killedby"].get<vector<string>>();
 	for(string s : v) cout << s << endl;
 
-
-	// if you want to handle fields that may or may not exist in the json
-	// file, here is one way to do it:
 	string s;
 	try {
 		s = j["enemies"][0]["intro_msg"].get<string>();
@@ -80,7 +80,7 @@ int main()
 	catch(const json::exception& e) {
 		s = "some default message";
 	}
-	cout << s << endl;*/
+	cout << s << endl;
     
     
     
@@ -95,9 +95,9 @@ int main()
 
     auto it = commands.find(command);
     if (it != commands.end()) {
-        it->second(argument);
+        (player.*(it->second))(argument);
     } else {
-        unknownCommand(command);
+        player.unknownCommand(command);
     }
     return 0;
 
