@@ -16,6 +16,9 @@ public:
 	vector<string> inventory;
 	string curRoom;
 
+	json& gameData; // Reference to the JSON data
+
+    Player(json& jsonData) : gameData(jsonData) {}
 
 
 
