@@ -70,6 +70,50 @@ public:
 	}
 };
 typedef void (Player::*CommandFunction)(const string&, const json&);
+struct MapObject {
+    string category;
+    string id;
+    string description;
+    string initialRoom;
+};
+
+
+// Function to read the map and create objects
+vector<MapObject> readMap(const string& mapFileName) {
+    vector<MapObject> objects;
+
+    ifstream fin(mapFileName);
+    if (!fin.is_open()) {
+        cerr << "Error opening map file: " << mapFileName << endl;
+        return objects;
+    }
+
+    json j;
+    fin >> j;
+
+    // Read Rooms
+    for (const auto& room : j["rooms"]) {
+        MapObject roomObject;
+        roomObject.category = "Room";
+        roomObject.id = room["id"];
+        roomObject.description = room["desc"];
+        objects.push_back(roomObject);
+    }
+
+    // Read Objects
+    for (const auto& obj : j["objects"]) {
+        MapObject objectObject;
+        objectObject.category = "Object";
+        objectObject.id = obj["id"];
+        objectObject.description = obj["desc"];
+        objectObject.initialRoom = obj["initialroom"];
+        objects.push_back(objectObject);
+    }
+
+    // Add more categories as needed...
+
+    return objects;
+}
 
 int main()
 {
@@ -118,6 +162,20 @@ int main()
 	//	s = "some default message";
 	//}
 	//cout << s << endl;
+
+	string mapFileName = "map1.json";
+    vector<MapObject> mapObjects = readMap(mapFileName);
+
+    // Print the created objects
+    for (const auto& obj : mapObjects) {
+        cout << "Category: " << obj.category << ", ID: " << obj.id << ", Description: " << obj.description;
+        if (!obj.initialRoom.empty()) {
+            cout << ", Initial Room: " << obj.initialRoom;
+        }
+        cout << endl;
+    }
+
+    return 0;
     
     
     
