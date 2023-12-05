@@ -14,20 +14,49 @@ using  namespace std;
 class Player{
 public:
 	vector<string> inventory;
+	string curRoom;
+
+
+
 
 	void grab(const string& item) {
-		inventory.push_back(item);
-    	cout << "You grabbed: " << item << endl;
+		const auto& objects = gameData.at("objects");
+        const auto& curRoomObj = gameData.at("rooms").at(curRoom).at("objects");
+
+        cout << "DEBUG: Objects size: " << objects.size() << endl;
+        cout << "DEBUG: Current Room Objects size: " << curRoomObj.size() << endl;
+
+        const auto& foundObject = std::find_if(objects.begin(), objects.end(), [&](const auto& obj) {
+            return obj.at("id") == item && obj.at("initialroom") == curRoom;
+        });
+
+        if (foundObject != objects.end()) {
+            // Item found in the current room, add it to the inventory
+            inventory.push_back(item);
+            cout << "You grabbed: " << item << endl;
+        } else {
+            cout << "The item is not in the current room or doesn't exist." << endl;
+        }
 	}
 
 	void look(const string& item){
     	cout << "You look at: " << item << endl;
 	}
 
-	void move(const string& direction){
-    	cout << "You moved in " << direction << "direction" << endl;
+	 void move(const string& direction, const json& roomData) {
+        // Check if the requested direction is a valid exit
+        auto exits = roomData["exits"];
+        auto exitIt = exits.find(direction);
 
-	}
+        if (exitIt != exits.end()) {
+            // Valid exit, update the current room
+            string newRoom = exitIt.value().get<string>();
+            curRoom = newRoom;
+            cout << "You moved to " << newRoom << endl;
+        } else {
+            cout << "You can't move in that direction" << endl;
+        }
+	 }
 
 	void kill(const string& enemy){
     	cout << "You fought " << enemy << ", you died lol" << endl;
@@ -37,20 +66,25 @@ public:
     	cout << "Unknown command: " << command << endl;
 	}
 };
-typedef void (Player::*CommandFunction)(const string&);
+typedef void (Player::*CommandFunction)(const string&, const json&);
 
 int main()
 {
-	Player player;
+	
     ifstream fin("map1.json");
 	json j; // object that represents the json data
 	fin >> j; // read from file into j
 
+	Player player;
+	//initialises the player to the starting room according to the map json
+	player.curRoom = j["player"]["initialroom"].get<string>();
+
+	// Creates a map with the commands, can be expanded as currently assumes knowledge of valid commands
     unordered_map<string, CommandFunction> commands;
-    commands["grab"] = &Player::grab;
+    //commands["grab"] = &Player::grab;
     commands["move"] = &Player::move;
-    commands["kill"] = &Player::kill;
-    commands["look"] = &Player::look;
+    //commands["kill"] = &Player::kill;
+    //commands["look"] = &Player::look;
     
     int numTypes = j.size();
 	//cout << numTypes << endl;
@@ -61,44 +95,49 @@ int main()
 	}*/
 
 	// This outputs the number of rooms and something about the 2nd room
-	int numRooms = j["rooms"].size();
-	cout << numRooms << endl;
-	string room1desc =  j["rooms"][0]["desc"].get<string>();
-	cout << room1desc << endl;
+	//int numRooms = j["rooms"].size();
+	//cout << numRooms << endl;
+	//string room1desc =  j["rooms"][0]["desc"].get<string>();
+	//cout << room1desc << endl;
 
 	// This retrieves the aggressiveness of the first enemy,;o
 	// and the list of objects that kills it as a vector
-	int agg = j["enemies"][0]["aggressiveness"].get<int>();
-	cout << agg << endl;
-	vector<string> v = j["enemies"][0]["killedby"].get<vector<string>>();
-	for(string s : v) cout << s << endl;
+	//int agg = j["enemies"][0]["aggressiveness"].get<int>();
+	//cout << agg << endl;
+	//vector<string> v = j["enemies"][0]["killedby"].get<vector<string>>();
+	//for(string s : v) cout << s << endl;
 
-	string s;
-	try {
-		s = j["enemies"][0]["intro_msg"].get<string>();
-	}
-	catch(const json::exception& e) {
-		s = "some default message";
-	}
-	cout << s << endl;
+	//string s;
+	//try {
+	//	s = j["enemies"][0]["intro_msg"].get<string>();
+	//}
+	//catch(const json::exception& e) {
+	//	s = "some default message";
+	//}
+	//cout << s << endl;
     
     
     
-
+	while (true){
+		cout << j["rooms"][player.curRoom]["desc"].get<string>() << endl;
 
     string input, command, argument;
     cout << "Enter some text: ";
     getline(cin, input);
+
     cout << "You entered: " << input << endl;
+
     stringstream ss(input);
     ss >> command >> argument;
 
     auto it = commands.find(command);
     if (it != commands.end()) {
-        (player.*(it->second))(argument);
+        (player.*(it->second))(argument, j);
     } else {
         player.unknownCommand(command);
+		break;
     }
+	}
     return 0;
 
 
