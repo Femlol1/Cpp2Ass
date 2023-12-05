@@ -78,7 +78,7 @@ int main()
 	json j; // object that represents the json data
 	fin >> j; // read from file into j
 
-	Player player;
+	Player player(j);
 	//initialises the player to the starting room according to the map json
 	player.curRoom = j["player"]["initialroom"].get<string>();
 
