@@ -118,7 +118,7 @@ vector<MapObject> readMap(const string& mapFileName) {
 int main()
 {
 	
-    ifstream fin("map1.json");
+    ifstream fin("map2.json");// this also reads the file but we need to choose which one we are going to use
 	json j; // object that represents the json data
 	fin >> j; // read from file into j
 
@@ -163,7 +163,7 @@ int main()
 	//}
 	//cout << s << endl;
 
-	string mapFileName = "map1.json";
+	string mapFileName = "map1.json";// this reads the file 
     vector<MapObject> mapObjects = readMap(mapFileName);
 
     // Print the created objects
