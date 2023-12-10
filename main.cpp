@@ -65,6 +65,12 @@ public:
     	cout << "You fought " << enemy << ", you died lol" << endl;
 	}
 
+	void use(const string& item){
+		cout << "you used" <<  item << ", to open" << endl;
+	}
+
+
+
 	void unknownCommand(const string& command) {
     	cout << "Unknown command: " << command << endl;
 	}
@@ -115,95 +121,75 @@ vector<MapObject> readMap(const string& mapFileName) {
     return objects;
 }
 
-int main()
-{
-	
-    ifstream fin("map2.json");// this also reads the file but we need to choose which one we are going to use
-	json j; // object that represents the json data
-	fin >> j; // read from file into j
+int main() {
 
-	Player player(j);
-	//initialises the player to the starting room according to the map json
-	player.curRoom = j["player"]["initialroom"].get<string>();
+    ifstream fin("map1.json");// this also reads the file but we need to choose which one we are going to use
+    json j; // object that represents the json data
+    fin >> j; // read from file into j
 
-	// Creates a map with the commands, can be expanded as currently assumes knowledge of valid commands
+    Player player(j);
+    //initialises the player to the starting room according to the map json
+    player.curRoom = j["player"]["initialroom"].get<string>();
+    cout << player.curRoom << endl;
+    // Creates a map with the commands, can be expanded as currently assumes knowledge of valid commands
     unordered_map<string, CommandFunction> commands;
     //commands["grab"] = &Player::grab;
     commands["move"] = &Player::move;
     //commands["kill"] = &Player::kill;
     //commands["look"] = &Player::look;
-    
-    int numTypes = j.size();
-	//cout << numTypes << endl;
 
-	/*for(auto e : j.items()) {
-		string s = e.key();
-		cout << s << endl;
-	}*/
+//    string roomDesc = j["rooms"][player.curRoom]["desc"];
 
-	// This outputs the number of rooms and something about the 2nd room
-	//int numRooms = j["rooms"].size();
-	//cout << numRooms << endl;
-	//string room1desc =  j["rooms"][0]["desc"].get<string>();
-	//cout << room1desc << endl;
+        string mapFileName = "map1.json";// this reads the file
+        vector<MapObject> mapObjects = readMap(mapFileName);
 
-	// This retrieves the aggressiveness of the first enemy,;o
-	// and the list of objects that kills it as a vector
-	//int agg = j["enemies"][0]["aggressiveness"].get<int>();
-	//cout << agg << endl;
-	//vector<string> v = j["enemies"][0]["killedby"].get<vector<string>>();
-	//for(string s : v) cout << s << endl;
 
-	//string s;
-	//try {
-	//	s = j["enemies"][0]["intro_msg"].get<string>();
-	//}
-	//catch(const json::exception& e) {
-	//	s = "some default message";
-	//}
-	//cout << s << endl;
-
-	string mapFileName = "map1.json";// this reads the file 
-    vector<MapObject> mapObjects = readMap(mapFileName);
-
-    // Print the created objects
-    for (const auto& obj : mapObjects) {
-        cout << "Category: " << obj.category << ", ID: " << obj.id << ", Description: " << obj.description;
-        if (!obj.initialRoom.empty()) {
-            cout << ", Initial Room: " << obj.initialRoom;
+        for (const auto &room: mapObjects) {
+            string roomId = room.id;
+            if (player.curRoom == roomId) {
+                cout << "Match found! Room ID: " << roomId << endl;
+                string roomDesc = room.description;
+                cout << "Room Description: " << roomDesc << endl;
+                break; // Break out of the loop once the matching room is found
+            }
         }
-        cout << endl;
+
+        // Print the created objects
+        for (const auto &obj: mapObjects) {
+            //cout << "Category: " << obj.category << ", ID: " << obj.id << ", Description: " << obj.description;
+            if (!obj.initialRoom.empty()) {
+                cout << ", Initial Room: " << obj.initialRoom;
+            }
+            cout << endl;
+        }
+
+
+
+
+//	while (true){
+//		cout << j["rooms"][player.curRoom]["desc"].get<string>() << endl;
+
+        string input, command, argument;
+        cout << "Enter some text: ";
+        getline(cin, input);
+
+        cout << "You entered: " << input << endl;
+
+        stringstream ss(input);
+        ss >> command >> argument;
+
+        auto it = commands.find(command);
+        if (it != commands.end()) {
+            (player.*(it->second))(argument, j);
+        } else {
+            player.unknownCommand(command);
+//		break;
+        }
+
+        return 0;
+
+
+        //Redundant for now, can be implemented later to make the code cleaner
+        // program program;
+        // program();
     }
-
-    return 0;
-    
-    
-    
-	while (true){
-		cout << j["rooms"][player.curRoom]["desc"].get<string>() << endl;
-
-    string input, command, argument;
-    cout << "Enter some text: ";
-    getline(cin, input);
-
-    cout << "You entered: " << input << endl;
-
-    stringstream ss(input);
-    ss >> command >> argument;
-
-    auto it = commands.find(command);
-    if (it != commands.end()) {
-        (player.*(it->second))(argument, j);
-    } else {
-        player.unknownCommand(command);
-		break;
-    }
-	}
-    return 0;
-
-
-	//Redundant for now, can be implemented later to make the code cleaner
-    // program program;
-    // program();
-}
-
