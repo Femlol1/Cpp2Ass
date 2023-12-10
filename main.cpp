@@ -46,28 +46,27 @@ public:
     	cout << "You look at: " << item << endl;
 	}
 
-	 void move(const string& direction, const json& roomData) {
-        // Check if the requested direction is a valid exit
-        auto exits = roomData["exits"];
-        auto exitIt = exits.find(direction);
+	 void move(const string& direction, const json& j) {
+        // Find the current room in the JSON data
+        auto roomIt = find_if(j["rooms"].begin(), j["rooms"].end(),
+                              [this](const json& room) { return room["id"] == this->curRoom; });
 
-        if (exitIt != exits.end()) {
-            // Valid exit, update the current room
-            string newRoom = exitIt.value().get<string>();
-            curRoom = newRoom;
-            cout << "You moved to " << newRoom << endl;
+        if (roomIt != j["rooms"].end()) {
+            // Check if the requested direction is a valid exit
+            auto exits = roomIt->at("exits");
+            auto exitIt = exits.find(direction);
+
+            if (exitIt != exits.end()) {
+                // Valid exit, update the current room
+                this->curRoom = exitIt.value().get<string>();
+                cout << "You moved to " << this->curRoom << endl;
+            } else {
+                cout << "You can't move in that direction" << endl;
+            }
         } else {
-            cout << "You can't move in that direction" << endl;
+            cout << "You are in an unknown location." << endl;
         }
-	 }
-
-	void kill(const string& enemy){
-    	cout << "You fought " << enemy << ", you died lol" << endl;
-	}
-
-	void use(const string& item){
-		cout << "you used" <<  item << ", to open" << endl;
-	}
+    }
 
 
 
