@@ -1,6 +1,7 @@
-main: main.cpp
-	g++ main.cpp -o main
+all: main
 
+main: main.cpp Player.cpp Utilities.cpp
+	g++ main.cpp Player.cpp Utilities.cpp -o main
 
 # Some cleanup functions, invoked by typing "make clean" or "make deepclean"
 deepclean:
