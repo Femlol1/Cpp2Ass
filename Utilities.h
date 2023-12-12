@@ -9,6 +9,8 @@ struct MapObject {
     std::string id;
     std::string description;
     std::string initialRoom;
+    std::string aggressiveness;
+    std::string killedby;
 };
 
 std::vector<MapObject> readMap(const std::string& mapFileName);

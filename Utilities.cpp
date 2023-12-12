@@ -46,6 +46,18 @@ vector<MapObject> readMap(const string& mapFileName) {
         objects.push_back(objectObject);
     }
 
+    for (const auto& enemy:j["enemies"]) {
+        MapObject enemyObject;
+        enemyObject.category = "Enemy";
+        enemyObject.id = enemy["id"];
+        enemyObject.description = enemy["desc"];
+        enemyObject.aggressiveness = enemy["aggressiveness"];
+        enemyObject.initialRoom = enemy["initialroom"];
+        enemyObject.killedby = enemy["killedby"];
+        objects.push_back(enemyObject);
+
+    }
+
     // Add more categories as needed...
 
     return objects;

@@ -1,5 +1,6 @@
 #include "Player.h"
-#include "iostream"
+#include <iostream>
+#include <vector>
 
 using  namespace std;
 
@@ -19,14 +20,32 @@ void Player::grab(const std::string& item, const json& gameData) {
         // Item found in the current room, add it to the inventory
         inventory.push_back(item);
         cout << "You grabbed: " << item << endl;
+//        objects.erase(foundObject);
     } else {
-        cout << "The item is not in the current room or doesn't exist." << endl;
+        cout << "The item is "<< item <<"not in the current room or doesn't exist." << endl;
     }
 }
 
-void Player::look(const std::string& item, const json& roomData) {
-    cout << "You look at: " << item << endl;
+
+void Player::look(const std::string& item, const json& gameData) {
 }
+
+
+
+//void Player::look(const std::string& item, const json& roomData) {
+//    for (const auto& obj : j["objects"]) {
+//        if (obj["initialroom"] == curRoom) {
+//            cout << "There is a "<<obj["id"] <<", "<< obj["desc"] << endl;
+//        }
+//    }
+//
+//    // Display enemies in the room
+//    for (const auto& enemy : j["enemies"]) {
+//        if (enemy["initialroom"] == player.curRoom) {
+//            cout << "There is a "<<enemy["id"] <<", "<< enemy["desc"] << endl;
+//        }
+//    }
+//}
 
 void Player::move(const std::string& direction, const json& j) {
     // Find the current room in the JSON data

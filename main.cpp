@@ -59,6 +59,7 @@ int main() {
         cerr << "Failed to open map" << mapFileName << endl;
         return 1;
     }
+//    readMap();
     json j; // object that represents the json data
     fin >> j; // read from file into j
 
