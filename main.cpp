@@ -118,28 +118,46 @@ int main() {
             player.unknownCommand(command);
         }
 
-        // // Find the current room in the JSON data
-        // auto roomIt = find_if(j["rooms"].begin(), j["rooms"].end(),
-        //                       [&player](const json &room) { return room["id"] == player.curRoom; });
 
-        // // Print the room description here
-        // if (roomIt != j["rooms"].end()) {
-        //     cout << roomIt->at("desc") << endl;
-        //     for (const auto& obj : j["objects"]) {
-        //         if (obj["initialroom"] == player.curRoom) {
-        //             cout << "There is a "<<obj["id"] <<", "<< obj["desc"] << endl;
-        //         }
-        //     }
 
-        //     // Display enemies in the room
-        //     for (const auto& enemy : j["enemies"]) {
-        //         if (enemy["initialroom"] == player.curRoom) {
-        //             cout << "There is a "<<enemy["id"] <<", "<< enemy["desc"] << endl;
-        //         }
-        //     }
-        // } else {
-        //     cout << "You are in an unknown location." << endl;
-        //     break;
-        // }
+        // Check kill objective
+    auto objectiveType = j["objective"]["type"].get<std::string>();
+    if (objectiveType == "kill") {
+        // Update the requiredKills set
+        auto requiredEnemies = j["objective"]["what"];
+        for (const auto& enemy : requiredEnemies) {
+            player.requiredKills.insert(enemy.get<std::string>());
+        }
+            std::unordered_set<std::string> intersection;
+            std::set_intersection(player.getRequiredKills().begin(), player.getRequiredKills().end(), player.getDeadEnemies().begin(), player.getDeadEnemies().end(), std::inserter(intersection, intersection.begin()));
+
+        if (intersection == player.getRequiredKills()) {
+            cout << "Congratulations! You have completed the kill objective. You win!" << endl;
+            break;  // Exit the game loop
+        }
     }
+    // else if (objectiveType == "collect"){
+    //     if (objectiveType == "collect") {
+    //     // Update the requiredItems set
+    //     auto requiredItems = j["objective"]["what"];
+    //     for (const auto& item : requiredItems) {
+    //         player.collectItem(item.get<std::string>());
+    //     }
+
+    //     // Check if the player has collected all required items
+    //     if (std::includes(player.collectedItems.begin(), player.collectedItems.end(),
+    //                       requiredItems.begin(), requiredItems.end())) {
+    //         cout << "Congratulations! You have completed the collect objective. You win!" << endl;
+    //         break;  // Exit the game loop
+    //     }
+    // }
+    // }
+    else if (objectiveType == "room") {
+
+        auto targetRoom = j["objective"]["what"].get<std::string>();
+        if (player.curRoom == targetRoom){
+            cout<< "Congratlations! You have reached the required room. You win!" << endl;
+        }
+    }
+}
 }

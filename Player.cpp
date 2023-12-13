@@ -55,7 +55,12 @@ void Player::look(const std::string& item, const json& gameData) {
     } else if (foundObjectInInventory != inventory.end()) {
         cout << foundObjectInRoom->at("desc") << endl;
     } else if (foundEnemy != gameData["enemies"].end()) {
-        cout << foundEnemy->at("desc") << endl;
+        if (deadEnemies.find(foundEnemy->at("id")) != deadEnemies.end()) {
+            cout << "Oh look, a dead " << foundEnemy->at("id") << "." << endl;
+        }
+        else {
+            cout << foundEnemy->at("desc") << endl;
+        }
     } else {
         cout << "There is nothing in the room" << endl;
     }
