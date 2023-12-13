@@ -17,7 +17,7 @@ public:
     void kill(const std::string& enemy, const json& gameData);
     void unknownCommand(const std::string& command);
 
-    void printRoomAndItems(const nlohmann::json& j);
+    void printRoomAndItems();
 
     std::string curRoom;
 private:

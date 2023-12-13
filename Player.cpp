@@ -43,7 +43,8 @@ void Player::look(const std::string& item, const json& gameData) {
 
     if (foundObject != objects.end()) {
         // Item found in the current room, print its description
-        cout << "You look at the " << item << ": " << foundObject->at("desc") << endl;
+        cout << foundObject->at("desc") << endl;
+//        cout << "You looked at the " << item << ": " << foundObject->at("desc") << endl;
     } else {
         cout << "There is nothing in the room" << endl;
     }
@@ -81,7 +82,7 @@ void Player::move(const std::string& direction, const json& j) {
             this->curRoom = exitIt.value().get<string>();
             cout << "You moved to " << this->curRoom << endl;
 
-            printRoomAndItems(*this, j);
+            printRoomAndItems();
         } else {
             cout << "You can't move in that direction" << endl;
         }
@@ -112,30 +113,25 @@ void Player::kill(const std::string& enemy, const json& gameData) {
 
     }
 }
-void Player::printRoomAndItems(const json& j) {
-    const auto& enemies = gameData.at("enemies");
-    auto foundEnemy = std::find_if(enemies.begin(), enemies.end(), [&](const auto& e) {
-        return e.at("id") == enemy && e.at("initialroom") == curRoom;
-    });
-    cout << "There is an enemy:" << enemt["id"] << endl;
-    // Find and print the initial room description
-    auto roomIt = find_if(j["rooms"].begin(), j["rooms"].end(),
-                          [&Player](const json& room) { return room["id"] == this->curRoom; });
+void Player::printRoomAndItems() {
+    auto roomIt = find_if(gameData["rooms"].begin(), gameData["rooms"].end(),
+                          [this](const json& room) { return room["id"] == this->curRoom; });
 
-    if (roomIt != j["rooms"].end()) {
+    if (roomIt != gameData["rooms"].end()) {
         cout << roomIt->at("desc") << endl;
-        for (const auto& obj : j["objects"]) {
+        for (const auto& obj : gameData["objects"]) {
             if (obj["initialroom"] == curRoom) {
-                cout << "There is a "<<obj["id"] <<", "<< obj["desc"] << endl;
+                cout << "There is a " << obj["id"] << endl;
+//                cout << "There is a " << obj["id"] << ", " << obj["desc"] << endl;
             }
         }
 
-        // // Display enemies in the room
-        // for (const auto& enemy : j["enemies"]) {
-        //     if (enemy["initialroom"] == curRoom) {
-        //         cout << "There is a "<<enemy["id"] <<", "<< enemy["desc"] << endl;
-        //     }
-        // }
+        for (const auto& enemy : gameData["enemies"]) {
+            if (enemy["initialroom"] == curRoom) {
+                cout << "There is a " << enemy["id"] << endl;
+//                cout << "There is a " << enemy["id"] << ", " << enemy["desc"] << endl;
+            }
+        }
     }
 }
 
