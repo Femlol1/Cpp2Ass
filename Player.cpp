@@ -37,14 +37,25 @@ void Player::look(const std::string& item, const json& gameData) {
 
     const auto& objects = gameData.at("objects");
 
-    auto foundObject = std::find_if(objects.begin(), objects.end(), [&](const auto& obj) {
+    // Check if the item is in the player's current room
+    auto foundObjectInRoom = std::find_if(gameData["objects"].begin(), gameData["objects"].end(), [&](const auto& obj) {
         return obj.at("id") == item && obj.at("initialroom") == curRoom;
     });
 
-    if (foundObject != objects.end()) {
-        // Item found in the current room, print its description
-        cout << foundObject->at("desc") << endl;
-//        cout << "You looked at the " << item << ": " << foundObject->at("desc") << endl;
+    // Check if the item is in the player's inventory
+    auto foundObjectInInventory = std::find(inventory.begin(), inventory.end(), item);
+
+    // Check if the enemy is in the player's current room
+    auto foundEnemy = std::find_if(gameData["enemies"].begin(), gameData["enemies"].end(), [&](const auto& enemy) {
+        return enemy.at("id") == item && enemy.at("initialroom") == curRoom;
+    });
+
+     if (foundObjectInRoom != gameData["objects"].end()) {
+        cout << foundObjectInRoom->at("desc") << endl;
+    } else if (foundObjectInInventory != inventory.end()) {
+        cout << foundObjectInRoom->at("desc") << endl;
+    } else if (foundEnemy != gameData["enemies"].end()) {
+        cout << foundEnemy->at("desc") << endl;
     } else {
         cout << "There is nothing in the room" << endl;
     }
@@ -68,6 +79,21 @@ void Player::look(const std::string& item, const json& gameData) {
 //}
 
 void Player::move(const std::string& direction, const json& j) {
+
+     // Check if there's an enemy in the current room
+    auto foundEnemy = std::find_if(j["enemies"].begin(), j["enemies"].end(),
+                                    [&](const auto& enemy) {
+                                        return enemy.at("initialroom") == curRoom &&
+                                               deadEnemies.find(enemy.at("id")) == deadEnemies.end();
+                                    });
+
+    // If an enemy is present, check for aggressiveness
+    if (foundEnemy != j["enemies"].end() && foundEnemy->at("aggressiveness").get<int>() > 0 && rand() % 100 < foundEnemy->at("aggressiveness").get<int>()) {
+        cout << "The " << foundEnemy->at("id") << " attacked you while moving!" << endl;
+        die();
+        return;
+    }
+
     // Find the current room in the JSON data
     auto roomIt = find_if(j["rooms"].begin(), j["rooms"].end(),
                           [this](const json& room) { return room["id"] == this->curRoom; });
@@ -92,27 +118,37 @@ void Player::move(const std::string& direction, const json& j) {
 }
 
 void Player::kill(const std::string& enemy, const json& gameData) {
-    const auto& enemies = gameData.at("enemies");
+    auto& enemies = gameData["enemies"];
     auto foundEnemy = std::find_if(enemies.begin(), enemies.end(), [&](const auto& e) {
-        return e.at("id") == enemy && e.at("initialroom") == curRoom;
+        return e.at("id") == enemy && e.at("initialroom") == curRoom && deadEnemies.find(enemy) == deadEnemies.end();
     });
 
     if (foundEnemy != enemies.end()) {
-        // Check if the player has the required item to kill the enemy
-        auto requiredItem = foundEnemy->at("killedby")[0].get<string>();
-        if (std::find(inventory.begin(), inventory.end(), requiredItem) != inventory.end()) {
-            cout << "You used the " << requiredItem << " to kill the " << enemy << "." << endl;
+        auto requiredItems = foundEnemy->value("killedby", json::array());
 
-            // Logic to remove the enemy from the game
+        if (requiredItems.empty() || std::all_of(requiredItems.begin(), requiredItems.end(), [this](const auto& item) {
+            return std::find(inventory.begin(), inventory.end(), item) != inventory.end();
+                                                   })) {
+            cout << "You ";
+            if (!requiredItems.empty()) {
+                cout << "used ";
+                for (const auto& item : requiredItems) {
+                    cout << item << " ";
+                }
+            }
+            cout << " to kill the " << enemy << "." << endl;
+            deadEnemies.insert(enemy); // Mark the enemy as dead in the set
         } else {
-            cout << "You don't have the required "<< requiredItem<<" to kill the " << enemy << ". Game Over." << endl;
-
+            cout << "You don't have the required item" << endl;
+            die(); // Player dies if they don't have the required item
         }
     } else {
-        cout << "There is no " << enemy << " here to kill." << endl;
-
+        cout << "There is no " << enemy << " here to kill or it's already dead." << endl;
     }
 }
+
+
+
 void Player::printRoomAndItems() {
     auto roomIt = find_if(gameData["rooms"].begin(), gameData["rooms"].end(),
                           [this](const json& room) { return room["id"] == this->curRoom; });
@@ -127,20 +163,32 @@ void Player::printRoomAndItems() {
         }
 
         for (const auto& enemy : gameData["enemies"]) {
-            if (enemy["initialroom"] == curRoom) {
+        if (enemy["initialroom"] == curRoom) {
+             // Check if the enemy is in the deadEnemies set
+            if (deadEnemies.find(enemy["id"]) == deadEnemies.end()) {
                 cout << "There is a " << enemy["id"] << endl;
-//                cout << "There is a " << enemy["id"] << ", " << enemy["desc"] << endl;
+                // Additional information about the enemy can be added here if needed
+            } else {
+                cout << "There is a dead " << enemy["id"] << endl;
             }
-        }
     }
 }
+    }
+}
+
+
+
+// Allows the player to die internally, seperate to the exit command
+void Player::die() {
+    cout << "You died, game over" << endl;
+    exit(1);
+}
+
+
 
 void Player::unknownCommand(const std::string& command) {
     cout << "Unknown command: " << command << endl;
 }
 
-// implement kill function
-// if player doesnt have item die immediately
-// if you leave, die based on aggressiveness
+
 // implement win condition
-// implement exit program

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -16,6 +17,7 @@ public:
     void move(const std::string& direction, const json& j);
     void kill(const std::string& enemy, const json& gameData);
     void unknownCommand(const std::string& command);
+    void die();
 
     void printRoomAndItems();
 
@@ -23,6 +25,7 @@ public:
 private:
     std::vector<std::string> inventory;
     json& gameData;
+    std::unordered_set<std::string> deadEnemies;
 };
 
 #endif // PLAYER_H
