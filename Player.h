@@ -26,8 +26,13 @@ public:
         return requiredKills;
     }
 
-    void collectItem(const std::string& item) {
-        collectedItems.insert(item);
+    const std::vector<std::string>& getInventory() const {
+        return inventory;
+    }
+
+    // Function to add an item to the player's inventory
+    void addToInventory(const std::string& item) {
+        inventory.push_back(item);
     }
 
     void printRoomAndItems();
@@ -35,11 +40,11 @@ public:
     // Win condition storage
     std::unordered_set<std::string> requiredKills;
     std::unordered_set<std::string> requiredItems;
-    std::unordered_set<std::string> collectedItems;
+    std::unordered_map<std::string, std::vector<std::string>> collectedItems;
+    std::vector<std::string> inventory;
 
     std::string curRoom;
 private:
-    std::vector<std::string> inventory;
     json& gameData;
     std::unordered_set<std::string> deadEnemies;
 

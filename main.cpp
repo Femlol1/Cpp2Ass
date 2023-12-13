@@ -133,6 +133,37 @@ int main() {
 
         if (intersection == player.getRequiredKills()) {
             cout << "Congratulations! You have completed the kill objective. You win!" << endl;
+            break;
+        }
+    }
+
+
+    else if (objectiveType == "collect") {
+        // Update the requiredItems vector
+        auto requiredItems = j["objective"]["what"];
+        // auto objectiveName = j["objective"]["name"].get<std::string>(); // Assuming there is a name field for each objective
+        std::vector<std::string> requiredItemsVec;
+
+        for (const auto& item : requiredItems) {
+            // Check if the element is a string before trying to get its value
+            if (item.is_string()) {
+                requiredItemsVec.push_back(item.get<std::string>());
+            } else {
+                // Handle the case where the element is not a string (e.g., null)
+                cout << "Invalid item in the objective list." << endl;
+                break;
+            }
+        }
+
+        // Check if the player has collected all required items for the specific objective
+        const auto& inventory = player.inventory;
+        bool allItemsCollected = std::all_of(requiredItemsVec.begin(), requiredItemsVec.end(),
+            [&](const std::string& requiredItem) {
+                return std::find(inventory.begin(), inventory.end(), requiredItem) != inventory.end();
+            });
+
+        if (allItemsCollected) {
+            cout << "Congratulations! You have completed the collect objective. You win!" << endl;
             break;  // Exit the game loop
         }
     }
@@ -152,6 +183,8 @@ int main() {
     //     }
     // }
     // }
+
+
     else if (objectiveType == "room") {
 
         auto targetRoom = j["objective"]["what"][0].get<std::string>();
