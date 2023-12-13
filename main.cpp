@@ -154,9 +154,10 @@ int main() {
     // }
     else if (objectiveType == "room") {
 
-        auto targetRoom = j["objective"]["what"].get<std::string>();
+        auto targetRoom = j["objective"]["what"][0].get<std::string>();
         if (player.curRoom == targetRoom){
             cout<< "Congratlations! You have reached the required room. You win!" << endl;
+            break;
         }
     }
 }
