@@ -30,9 +30,12 @@ int main() {
     string directoryPath = "./"; // Set the directory path where map files are stored
 
     vector<string> availableMaps;
+    vector<string> availableMapsFiles;
     for (const auto &entry: directory_iterator(directoryPath)) {
         if (entry.path().extension() == ".json") {
-            availableMaps.push_back(entry.path().filename().string());
+            availableMaps.push_back(entry.path().stem().string());
+            availableMapsFiles.push_back(entry.path().filename().string());
+
         }
     }
 
@@ -58,7 +61,7 @@ int main() {
         }
     }
 
-    string mapFileName = availableMaps[mapChoice - 1];
+    string mapFileName = availableMapsFiles[mapChoice - 1];
 
     ifstream fin(mapFileName);
 
