@@ -69,20 +69,7 @@ void Player::look(const std::string& item, const json& gameData) {
 
 
 
-//void Player::look(const std::string& item, const json& roomData) {
-//    for (const auto& obj : j["objects"]) {
-//        if (obj["initialroom"] == curRoom) {
-//            cout << "There is a "<<obj["id"] <<", "<< obj["desc"] << endl;
-//        }
-//    }
-//
-//    // Display enemies in the room
-//    for (const auto& enemy : j["enemies"]) {
-//        if (enemy["initialroom"] == player.curRoom) {
-//            cout << "There is a "<<enemy["id"] <<", "<< enemy["desc"] << endl;
-//        }
-//    }
-//}
+
 
 void Player::move(const std::string& direction, const json& j) {
 

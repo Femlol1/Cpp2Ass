@@ -93,6 +93,8 @@ int main() {
     commands["fight"] = &Player::kill;
     commands["shoot"] = &Player::kill;
     commands["look"] = &Player::look;
+    commands["look around"] = &Player::look;
+
 
 
     while (true) {
@@ -187,3 +189,6 @@ int main() {
 
 //gam over in empty room
 // need to remove object after it is grabbed
+// implement a list items comand to show inventory
+//once player leves the room and comes back , they should not see the dead enemy still there 
+// enemy should always attach , sussess depends on aggressiveness 
