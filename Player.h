@@ -36,6 +36,7 @@ public:
     }
 
     void printRoomAndItems();
+    void noExitGameOver();
 
     // Win condition storage
     std::unordered_set<std::string> requiredKills;
@@ -49,6 +50,7 @@ private:
     std::unordered_set<std::string> deadEnemies;
 
 
+    void mapObjective();
 };
 
 #endif // PLAYER_H

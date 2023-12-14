@@ -25,9 +25,9 @@ void Player::grab(const std::string& item, const json& gameData) {
     if (foundObject != objects.end()) {
         // Item found in the current room, add it to the inventory
         inventory.push_back(item);
-        cout << "You grabbed: " << item << endl;
+        cout << "You grabbed " << item << endl;
     } else {
-        cout << "The item is "<< item <<"not in the current room or doesn't exist." << endl;
+        cout << "The item "<< item <<" is not in the current room or doesn't exist." << endl;
     }
 }
 }
@@ -51,18 +51,19 @@ void Player::look(const std::string& item, const json& gameData) {
     });
 
      if (foundObjectInRoom != gameData["objects"].end()) {
-        cout << foundObjectInRoom->at("desc") << endl;
+        cout << foundObjectInRoom->at("desc").get<std::string>() << endl;
     } else if (foundObjectInInventory != inventory.end()) {
-        cout << foundObjectInRoom->at("desc") << endl;
+        cout << foundObjectInRoom->at("desc").get<std::string>() << endl;
     } else if (foundEnemy != gameData["enemies"].end()) {
         if (deadEnemies.find(foundEnemy->at("id")) != deadEnemies.end()) {
-            cout << "Oh look, a dead " << foundEnemy->at("id") << "." << endl;
+            cout << "Oh look, a dead " << foundEnemy->at("id").get<std::string>() << "." << endl;
         }
         else {
-            cout << foundEnemy->at("desc") << endl;
+            cout << foundEnemy->at("desc").get<std::string>() << endl;
         }
     } else {
-        cout << "There is nothing in the room" << endl;
+         printRoomAndItems();
+        //cout << "There is nothing in the room" << endl;
     }
 }
 
@@ -94,7 +95,7 @@ void Player::move(const std::string& direction, const json& j) {
 
     // If an enemy is present, check for aggressiveness
     if (foundEnemy != j["enemies"].end() && foundEnemy->at("aggressiveness").get<int>() > 0 && rand() % 100 < foundEnemy->at("aggressiveness").get<int>()) {
-        cout << "The " << foundEnemy->at("id") << " attacked you while moving!" << endl;
+        cout << "The " << foundEnemy->at("id").get<std::string>() << " attacked you while moving!" << endl;
         die();
         return;
     }
@@ -111,13 +112,14 @@ void Player::move(const std::string& direction, const json& j) {
         if (exitIt != exits.end()) {
             // Valid exit, update the current room
             this->curRoom = exitIt.value().get<string>();
-            cout << "You moved to " << this->curRoom << endl;
+            //cout << "You moved to " << this->curRoom << endl;
 
             printRoomAndItems();
         } else {
             cout << "You can't move in that direction" << endl;
         }
     } else {
+
         cout << "You are in an unknown location." << endl;
     }
 }
@@ -138,11 +140,14 @@ void Player::kill(const std::string& enemy, const json& gameData) {
             if (!requiredItems.empty()) {
                 cout << "used ";
                 for (const auto& item : requiredItems) {
-                    cout << item << " ";
+                    cout << item.get<std::string>() << " ";
                 }
+                cout << "to kill the " << enemy << "." << endl;
+
+            }else {
+                cout << "killed the " << enemy << "." << endl;
+                deadEnemies.insert(enemy); // Mark the enemy as dead in the set
             }
-            cout << " to kill the " << enemy << "." << endl;
-            deadEnemies.insert(enemy); // Mark the enemy as dead in the set
         } else {
             cout << "You don't have the required item" << endl;
             die(); // Player dies if they don't have the required item
@@ -152,18 +157,20 @@ void Player::kill(const std::string& enemy, const json& gameData) {
     }
 }
 
+//wanted to create a finction that allows the player to ask what the objective
+void Player::mapObjective(){
 
+}
 
 void Player::printRoomAndItems() {
     auto roomIt = find_if(gameData["rooms"].begin(), gameData["rooms"].end(),
                           [this](const json& room) { return room["id"] == this->curRoom; });
 
     if (roomIt != gameData["rooms"].end()) {
-        cout << roomIt->at("desc") << endl;
+        cout << roomIt->at("desc").get<std::string>() << endl;
         for (const auto& obj : gameData["objects"]) {
             if (obj["initialroom"] == curRoom) {
-                cout << "There is a " << obj["id"] << endl;
-//                cout << "There is a " << obj["id"] << ", " << obj["desc"] << endl;
+                cout << "There is a " << obj["id"].get<std::string>() << endl;
             }
         }
 
@@ -171,10 +178,9 @@ void Player::printRoomAndItems() {
         if (enemy["initialroom"] == curRoom) {
              // Check if the enemy is in the deadEnemies set
             if (deadEnemies.find(enemy["id"]) == deadEnemies.end()) {
-                cout << "There is a " << enemy["id"] << endl;
-                // Additional information about the enemy can be added here if needed
+                cout << "There is a " << enemy["id"].get<std::string>()  << endl;
             } else {
-                cout << "There is a dead " << enemy["id"] << endl;
+                cout << "There is a dead " << enemy["id"].get<std::string>()  << endl;
             }
     }
 }
@@ -183,17 +189,23 @@ void Player::printRoomAndItems() {
 
 
 
-// Allows the player to die internally, seperate to the exit command
+// Allows the player to die internally, separate to the exit command
 void Player::die() {
-    cout << "You died, game over" << endl;
+    cout << "You died, game over." << endl;
+    exit(1);
+}
+
+//in case player gets stuck in a room, end the game
+void Player::noExitGameOver() {
+    cout << "You are stuck, game over." << endl;
     exit(1);
 }
 
 
-
 void Player::unknownCommand(const std::string& command) {
-    cout << "Unknown command: " << command << endl;
+    cout << "I don't understand " << command << endl;
 }
 
 
-// implement win condition
+
+// there seem to be p

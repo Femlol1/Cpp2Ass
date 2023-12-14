@@ -42,7 +42,7 @@ int main() {
     }
     int mapChoice = -1;
     while (mapChoice < 1 || mapChoice > availableMaps.size()) {
-        cout << "Available maps:" << endl;
+        cout << "Please choose a number from the available maps:" << endl;
         for (int i = 0; i < availableMaps.size(); ++i) {
             cout << i + 1 << ": " << availableMaps[i] << endl;
         }
@@ -83,9 +83,12 @@ int main() {
     // Creates a map with the commands, can be expanded as currently assumes knowledge of valid commands
     unordered_map<string, CommandFunction> commands;
     commands["grab"] = &Player::grab;
+    commands["take"] = &Player::grab;
     commands["move"] = &Player::move;
-    commands["go"] = &Player::move;
+    commands["go"]   = &Player::move;
     commands["kill"] = &Player::kill;
+    commands["fight"] = &Player::kill;
+    commands["shoot"] = &Player::kill;
     commands["look"] = &Player::look;
 
 
@@ -167,23 +170,6 @@ int main() {
             break;  // Exit the game loop
         }
     }
-    // else if (objectiveType == "collect"){
-    //     if (objectiveType == "collect") {
-    //     // Update the requiredItems set
-    //     auto requiredItems = j["objective"]["what"];
-    //     for (const auto& item : requiredItems) {
-    //         player.collectItem(item.get<std::string>());
-    //     }
-
-    //     // Check if the player has collected all required items
-    //     if (std::includes(player.collectedItems.begin(), player.collectedItems.end(),
-    //                       requiredItems.begin(), requiredItems.end())) {
-    //         cout << "Congratulations! You have completed the collect objective. You win!" << endl;
-    //         break;  // Exit the game loop
-    //     }
-    // }
-    // }
-
 
     else if (objectiveType == "room") {
 
@@ -195,3 +181,6 @@ int main() {
     }
 }
 }
+
+//gam over in empty room
+// need to remove object after it is grabbed
