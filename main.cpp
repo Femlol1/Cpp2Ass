@@ -4,191 +4,194 @@
 #include <vector>
 #include <unordered_map>
 #include <fstream>
+#include "Player.h"
+#include "Utilities.h"
+#include <filesystem>
+#include <cstdlib>
+#include <ctime>
+
+
 #include "json.hpp"
 
 using json = nlohmann::json;
 using  namespace std;
+using namespace std::filesystem;
 
 #include "program.cpp"
 
-class Player{
-public:
-	vector<string> inventory;
-	string curRoom;
 
-	json& gameData; // Reference to the JSON data
-
-    Player(json& jsonData) : gameData(jsonData) {}
-
-
-
-	void grab(const string& item) {
-		const auto& objects = gameData.at("objects");
-        const auto& curRoomObj = gameData.at("rooms").at(curRoom).at("objects");
-
-        cout << "DEBUG: Objects size: " << objects.size() << endl;
-        cout << "DEBUG: Current Room Objects size: " << curRoomObj.size() << endl;
-
-        const auto& foundObject = std::find_if(objects.begin(), objects.end(), [&](const auto& obj) {
-            return obj.at("id") == item && obj.at("initialroom") == curRoom;
-        });
-
-        if (foundObject != objects.end()) {
-            // Item found in the current room, add it to the inventory
-            inventory.push_back(item);
-            cout << "You grabbed: " << item << endl;
-        } else {
-            cout << "The item is not in the current room or doesn't exist." << endl;
-        }
-	}
-
-	void look(const string& item){
-    	cout << "You look at: " << item << endl;
-	}
-
-	 void move(const string& direction, const json& j) {
-        // Find the current room in the JSON data
-        auto roomIt = find_if(j["rooms"].begin(), j["rooms"].end(),
-                              [this](const json& room) { return room["id"] == this->curRoom; });
-
-        if (roomIt != j["rooms"].end()) {
-            // Check if the requested direction is a valid exit
-            auto exits = roomIt->at("exits");
-            auto exitIt = exits.find(direction);
-
-            if (exitIt != exits.end()) {
-                // Valid exit, update the current room
-                this->curRoom = exitIt.value().get<string>();
-                cout << "You moved to " << this->curRoom << endl;
-            } else {
-                cout << "You can't move in that direction" << endl;
-            }
-        } else {
-            cout << "You are in an unknown location." << endl;
-        }
-    }
-
-
-
-	void unknownCommand(const string& command) {
-    	cout << "Unknown command: " << command << endl;
-	}
-};
 typedef void (Player::*CommandFunction)(const string&, const json&);
-struct MapObject {
-    string category;
-    string id;
-    string description;
-    string initialRoom;
-};
 
 
-// Function to read the map and create objects
-vector<MapObject> readMap(const string& mapFileName) {
-    vector<MapObject> objects;
-
-    ifstream fin(mapFileName);
-    if (!fin.is_open()) {
-        cerr << "Error opening map file: " << mapFileName << endl;
-        return objects;
-    }
-
-    json j;
-    fin >> j;
-
-    // Read Rooms
-    for (const auto& room : j["rooms"]) {
-        MapObject roomObject;
-        roomObject.category = "Room";
-        roomObject.id = room["id"];
-        roomObject.description = room["desc"];
-        objects.push_back(roomObject);
-    }
-
-    // Read Objects
-    for (const auto& obj : j["objects"]) {
-        MapObject objectObject;
-        objectObject.category = "Object";
-        objectObject.id = obj["id"];
-        objectObject.description = obj["desc"];
-        objectObject.initialRoom = obj["initialroom"];
-        objects.push_back(objectObject);
-    }
-
-    // Add more categories as needed...
-
-    return objects;
-}
 
 int main() {
+    // Random number generator, for fanciness it has a different seed each session
+    srand(time(0));
+    string directoryPath = "./"; // Set the directory path where map files are stored
 
-    ifstream fin("map1.json");// this also reads the file but we need to choose which one we are going to use
+    vector<string> availableMaps;
+    for (const auto &entry: directory_iterator(directoryPath)) {
+        if (entry.path().extension() == ".json") {
+            availableMaps.push_back(entry.path().filename().string());
+        }
+    }
+
+    if (availableMaps.empty()) {
+        cerr << "No map files found in the directory." << endl;
+        return 1;
+    }
+    int mapChoice = -1;
+    while (mapChoice < 1 || mapChoice > availableMaps.size()) {
+        cout << "Available maps:" << endl;
+        for (int i = 0; i < availableMaps.size(); ++i) {
+            cout << i + 1 << ": " << availableMaps[i] << endl;
+        }
+        cout << "Choose a map number: ";
+        cin >> mapChoice;
+
+        // Clearing any error states of cin (like if the input was not a number)
+        if (cin.fail()) {
+            cin.clear(); // Reset the failbit
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear out the input buffer
+            mapChoice = -1; // Reset choice to keep the loop going
+            cout << "Invalid input. Please enter a number corresponding to the map choices." << endl;
+        }
+    }
+
+    string mapFileName = availableMaps[mapChoice - 1];
+
+    ifstream fin(mapFileName);
+
+    // ifstream fin("map1.json");// this also reads the file but we need to choose which one we are going to use
+    if (!fin) {
+        cerr << "Failed to open map" << mapFileName << endl;
+        return 1;
+    }
+//    readMap();
     json j; // object that represents the json data
     fin >> j; // read from file into j
 
     Player player(j);
     //initialises the player to the starting room according to the map json
     player.curRoom = j["player"]["initialroom"].get<string>();
-    cout << player.curRoom << endl;
+
+    player.printRoomAndItems();
+
+    
+
+
     // Creates a map with the commands, can be expanded as currently assumes knowledge of valid commands
     unordered_map<string, CommandFunction> commands;
-    //commands["grab"] = &Player::grab;
+    commands["grab"] = &Player::grab;
     commands["move"] = &Player::move;
-    //commands["kill"] = &Player::kill;
-    //commands["look"] = &Player::look;
-
-//    string roomDesc = j["rooms"][player.curRoom]["desc"];
-
-        string mapFileName = "map1.json";// this reads the file
-        vector<MapObject> mapObjects = readMap(mapFileName);
+    commands["go"] = &Player::move;
+    commands["kill"] = &Player::kill;
+    commands["look"] = &Player::look;
 
 
-        for (const auto &room: mapObjects) {
-            string roomId = room.id;
-            if (player.curRoom == roomId) {
-                cout << "Match found! Room ID: " << roomId << endl;
-                string roomDesc = room.description;
-                cout << "Room Description: " << roomDesc << endl;
-                break; // Break out of the loop once the matching room is found
-            }
-        }
-
-        // Print the created objects
-        for (const auto &obj: mapObjects) {
-            //cout << "Category: " << obj.category << ", ID: " << obj.id << ", Description: " << obj.description;
-            if (!obj.initialRoom.empty()) {
-                cout << ", Initial Room: " << obj.initialRoom;
-            }
-            cout << endl;
-        }
-
-
-
-
-//	while (true){
-//		cout << j["rooms"][player.curRoom]["desc"].get<string>() << endl;
-
+    while (true) {
         string input, command, argument;
-        cout << "Enter some text: ";
+//        cout << "Enter some text: ";
         getline(cin, input);
 
-        cout << "You entered: " << input << endl;
+
+        // Skip empty input
+        if(input.empty()) {
+            continue;
+        }
 
         stringstream ss(input);
-        ss >> command >> argument;
+        ss >> command;
+        ss.ignore();
+        getline(ss, argument);
+
+
+        //simple break command to prevent eternal looping and allows player to leave
+        if (command == "exit") {
+            break;
+        }
 
         auto it = commands.find(command);
         if (it != commands.end()) {
             (player.*(it->second))(argument, j);
         } else {
             player.unknownCommand(command);
-//		break;
         }
 
-        return 0;
 
 
-        //Redundant for now, can be implemented later to make the code cleaner
-        // program program;
-        // program();
+        // Check kill objective
+    auto objectiveType = j["objective"]["type"].get<std::string>();
+    if (objectiveType == "kill") {
+        // Update the requiredKills set
+        auto requiredEnemies = j["objective"]["what"];
+        for (const auto& enemy : requiredEnemies) {
+            player.requiredKills.insert(enemy.get<std::string>());
+        }
+            std::unordered_set<std::string> intersection;
+            std::set_intersection(player.getRequiredKills().begin(), player.getRequiredKills().end(), player.getDeadEnemies().begin(), player.getDeadEnemies().end(), std::inserter(intersection, intersection.begin()));
+
+        if (intersection == player.getRequiredKills()) {
+            cout << "Congratulations! You have completed the kill objective. You win!" << endl;
+            break;
+        }
     }
+
+
+    else if (objectiveType == "collect") {
+        // Update the requiredItems vector
+        auto requiredItems = j["objective"]["what"];
+        // auto objectiveName = j["objective"]["name"].get<std::string>(); // Assuming there is a name field for each objective
+        std::vector<std::string> requiredItemsVec;
+
+        for (const auto& item : requiredItems) {
+            // Check if the element is a string before trying to get its value
+            if (item.is_string()) {
+                requiredItemsVec.push_back(item.get<std::string>());
+            } else {
+                // Handle the case where the element is not a string (e.g., null)
+                cout << "Invalid item in the objective list." << endl;
+                break;
+            }
+        }
+
+        // Check if the player has collected all required items for the specific objective
+        const auto& inventory = player.inventory;
+        bool allItemsCollected = std::all_of(requiredItemsVec.begin(), requiredItemsVec.end(),
+            [&](const std::string& requiredItem) {
+                return std::find(inventory.begin(), inventory.end(), requiredItem) != inventory.end();
+            });
+
+        if (allItemsCollected) {
+            cout << "Congratulations! You have completed the collect objective. You win!" << endl;
+            break;  // Exit the game loop
+        }
+    }
+    // else if (objectiveType == "collect"){
+    //     if (objectiveType == "collect") {
+    //     // Update the requiredItems set
+    //     auto requiredItems = j["objective"]["what"];
+    //     for (const auto& item : requiredItems) {
+    //         player.collectItem(item.get<std::string>());
+    //     }
+
+    //     // Check if the player has collected all required items
+    //     if (std::includes(player.collectedItems.begin(), player.collectedItems.end(),
+    //                       requiredItems.begin(), requiredItems.end())) {
+    //         cout << "Congratulations! You have completed the collect objective. You win!" << endl;
+    //         break;  // Exit the game loop
+    //     }
+    // }
+    // }
+
+
+    else if (objectiveType == "room") {
+
+        auto targetRoom = j["objective"]["what"][0].get<std::string>();
+        if (player.curRoom == targetRoom){
+            cout<< "Congratlations! You have reached the required room. You win!" << endl;
+            break;
+        }
+    }
+}
+}
