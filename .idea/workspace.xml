@@ -12,16 +12,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2187c747-941b-485d-a0ae-de3917dbd266" name="Changes" comment="working code">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_12_2023_20_21_[Changes]1/main.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_12_2023_20_21_[Changes]1/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_12_2023_20_21__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_12_2023_20_21__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_12_2023_20_21__Changes_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_08_12_2023_20_21__Changes_1.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main" beforeDir="false" afterPath="$PROJECT_DIR$/main" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/player.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="2187c747-941b-485d-a0ae-de3917dbd266" name="Changes" comment="working code" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -160,7 +151,7 @@
       <workItem from="1702061388307" duration="5613000" />
       <workItem from="1702067054974" duration="952000" />
       <workItem from="1702235697658" duration="4626000" />
-      <workItem from="1702941047640" duration="2453000" />
+      <workItem from="1702941047640" duration="2768000" />
     </task>
     <task id="LOCAL-00001" summary="working code">
       <option name="closed" value="true" />
