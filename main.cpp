@@ -25,7 +25,7 @@ typedef void (Player::*CommandFunction)(const string&, const json&);
 
 
 int main() {
-    // Random number generator, for fanciness it has a different seed each session
+    // Random number generator, for fanciness it has a different seed each session but could be simplfied
     srand(time(0));
     string directoryPath = "./"; // Set the directory path where map files are stored
 
