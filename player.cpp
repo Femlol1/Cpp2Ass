@@ -162,8 +162,14 @@ void Player::printRoomAndItems() {
         cout << roomIt->at("desc") << endl;
         for (const auto& obj : gameData["objects"]) {
             if (obj["initialroom"] == curRoom) {
-                cout << "There is a " << obj["id"] << endl;
-//                cout << "There is a " << obj["id"] << ", " << obj["desc"] << endl;
+                 const std::string& objId = obj["id"];
+                
+                // Check if the item is in the player's inventory
+                if (std::find(inventory.begin(), inventory.end(), objId) == inventory.end()) {
+                    cout << "There is a " << objId << endl;
+                } else {
+                    cout << "There is a " << objId << ". It has been picked up." << endl;
+                }
             }
         }
 

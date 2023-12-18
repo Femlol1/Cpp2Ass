@@ -195,3 +195,6 @@ int main() {
     }
 }
 }
+
+// hide dead enemies
+// look at inventory
