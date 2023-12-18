@@ -27,7 +27,7 @@ void Player::grab(const std::string& item, const json& gameData) {
         inventory.push_back(item);
         cout << "You grabbed: " << item << endl;
     } else {
-        cout << "The item is "<< item <<"not in the current room or doesn't exist." << endl;
+        cout << "The item "<< item <<" is not in the current room or doesn't exist." << endl;
     }
 }
 }
@@ -94,7 +94,7 @@ void Player::move(const std::string& direction, const json& j) {
 
     // If an enemy is present, check for aggressiveness
     if (foundEnemy != j["enemies"].end() && foundEnemy->at("aggressiveness").get<int>() > 0 && rand() % 100 < foundEnemy->at("aggressiveness").get<int>()) {
-        cout << "The " << foundEnemy->at("id") << " attacked you while moving!" << endl;
+        cout << "The " << foundEnemy->at("id").get<std::string > ()<< " attacked you while moving!" << endl;
         die();
         return;
     }
@@ -137,12 +137,17 @@ void Player::kill(const std::string& enemy, const json& gameData) {
             cout << "You ";
             if (!requiredItems.empty()) {
                 cout << "used ";
-                for (const auto& item : requiredItems) {
-                    cout << item << " ";
+                for (const auto &item: requiredItems) {
+                    cout << item.get<std::string >() << " ";
+
                 }
-            }
+                cout << "killed the " << enemy << "." << endl;
+                deadEnemies.insert(enemy);
+
+            } else {
             cout << " to kill the " << enemy << "." << endl;
             deadEnemies.insert(enemy); // Mark the enemy as dead in the set
+            }
         } else {
             cout << "You don't have the required item" << endl;
             die(); // Player dies if they don't have the required item
@@ -159,7 +164,7 @@ void Player::printRoomAndItems() {
                           [this](const json& room) { return room["id"] == this->curRoom; });
 
     if (roomIt != gameData["rooms"].end()) {
-        cout << roomIt->at("desc") << endl;
+        cout << roomIt->at("desc").get<std::string>() << endl;
         for (const auto& obj : gameData["objects"]) {
             if (obj["initialroom"] == curRoom) {
                  const std::string& objId = obj["id"];
@@ -177,7 +182,7 @@ void Player::printRoomAndItems() {
         if (enemy["initialroom"] == curRoom) {
              // Check if the enemy is in the deadEnemies set
             if (deadEnemies.find(enemy["id"]) == deadEnemies.end()) {
-                cout << "There is a " << enemy["id"] << endl;
+                cout << "There is a " << enemy["id"].get<std::string >() << endl;
                 // Additional information about the enemy can be added here if needed
             }
     }

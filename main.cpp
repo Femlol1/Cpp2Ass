@@ -30,9 +30,11 @@ int main() {
     string directoryPath = "./"; // Set the directory path where map files are stored
 
     vector<string> availableMaps;
+    vector<string> allMaps;
     for (const auto &entry: directory_iterator(directoryPath)) {
         if (entry.path().extension() == ".json") {
             availableMaps.push_back(entry.path().filename().string());
+            allMaps.push_back(entry.path().stem().string());
         }
     }
 
@@ -41,10 +43,10 @@ int main() {
         return 1;
     }
     int mapChoice = -1;
-    while (mapChoice < 1 || mapChoice > availableMaps.size()) {
-        cout << "Available maps:" << endl;
-        for (int i = 0; i < availableMaps.size(); ++i) {
-            cout << i + 1 << ": " << availableMaps[i] << endl;
+    while (mapChoice < 1 || mapChoice > allMaps.size()) {
+        cout << "Please choose a number form the available maps:" << endl;
+        for (int i = 0; i < allMaps.size(); ++i) {
+            cout << i + 1 << ": " << allMaps[i] << endl;
         }
         cout << "Choose a map number: ";
         cin >> mapChoice;
@@ -83,10 +85,14 @@ int main() {
     // Creates a map with the commands, can be expanded as currently assumes knowledge of valid commands
     unordered_map<string, CommandFunction> commands;
     commands["grab"] = &Player::grab;
+    commands["take"] = &Player::grab;
     commands["move"] = &Player::move;
     commands["go"] = &Player::move;
     commands["kill"] = &Player::kill;
+    commands["shoot"] = &Player::kill;
+    commands["fight"] = &Player::kill;
     commands["look"] = &Player::look;
+    commands["look around"] = &Player::look;
 
 
     while (true) {
