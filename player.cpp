@@ -62,7 +62,7 @@ void Player::look(const std::string& item, const json& gameData) {
             cout << foundEnemy->at("desc") << endl;
         }
     } else {
-        cout << "There is nothing in the room" << endl;
+        printRoomAndItems();
     }
 }
 
@@ -168,7 +168,7 @@ void Player::printRoomAndItems() {
                 if (std::find(inventory.begin(), inventory.end(), objId) == inventory.end()) {
                     cout << "There is a " << objId << endl;
                 } else {
-                    cout << "There is a " << objId << ". It has been picked up." << endl;
+                    cout << "There was a " << objId << ". It has been picked up." << endl;
                 }
             }
         }
@@ -179,15 +179,22 @@ void Player::printRoomAndItems() {
             if (deadEnemies.find(enemy["id"]) == deadEnemies.end()) {
                 cout << "There is a " << enemy["id"] << endl;
                 // Additional information about the enemy can be added here if needed
-            } else {
-                cout << "There is a dead " << enemy["id"] << endl;
             }
     }
 }
     }
 }
 
-
+void Player::lookInventory() const {
+    if (inventory.empty()) {
+        cout << "Your inventory is empty." << endl;
+    } else {
+        cout << "Inventory Contents:" << endl;
+        for (const string& item : inventory) {
+            cout << "- " << item << endl;
+        }
+    }
+}
 
 // Allows the player to die internally, seperate to the exit command
 void Player::die() {

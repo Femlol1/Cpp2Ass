@@ -16,6 +16,7 @@ public:
     void look(const std::string& item, const json& gameData);
     void move(const std::string& direction, const json& j);
     void kill(const std::string& enemy, const json& gameData);
+    void lookInventory() const;
     void unknownCommand(const std::string& command);
     void die();
     const std::unordered_set<std::string>& getDeadEnemies() const {

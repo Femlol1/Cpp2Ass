@@ -111,11 +111,17 @@ int main() {
             break;
         }
 
-        auto it = commands.find(command);
-        if (it != commands.end()) {
-            (player.*(it->second))(argument, j);
+        // All the different ways the player can look at their inventory
+        if (command == "look" && argument == "inventory" || command == "items" || command == "inventory" || command == "look" && argument == "items") {
+        // Player wants to look at the inventory
+            player.lookInventory();
         } else {
-            player.unknownCommand(command);
+            auto it = commands.find(command);
+            if (it != commands.end()) {
+                (player.*(it->second))(argument, j);
+            } else {
+              player.unknownCommand(command);
+            }
         }
 
 
@@ -167,22 +173,7 @@ int main() {
             break;  // Exit the game loop
         }
     }
-    // else if (objectiveType == "collect"){
-    //     if (objectiveType == "collect") {
-    //     // Update the requiredItems set
-    //     auto requiredItems = j["objective"]["what"];
-    //     for (const auto& item : requiredItems) {
-    //         player.collectItem(item.get<std::string>());
-    //     }
 
-    //     // Check if the player has collected all required items
-    //     if (std::includes(player.collectedItems.begin(), player.collectedItems.end(),
-    //                       requiredItems.begin(), requiredItems.end())) {
-    //         cout << "Congratulations! You have completed the collect objective. You win!" << endl;
-    //         break;  // Exit the game loop
-    //     }
-    // }
-    // }
 
 
     else if (objectiveType == "room") {
@@ -196,5 +187,3 @@ int main() {
 }
 }
 
-// hide dead enemies
-// look at inventory
